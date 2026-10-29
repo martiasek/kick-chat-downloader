@@ -41,7 +41,13 @@ def test_full_run():
     assert p.failed_windows == 1 and p.phase == "done"
     names = {e["name"] for e in doc["embeddedData"]["thirdParty"]}
     assert names == {"POLICE"}  # emote 5 spadl a neshodil job
-    assert c[0]["message"]["user_badges"] == [{"_id": "subscriber", "version": "3"}]
+    assert c[0]["message"]["user_badges"] == [
+        {"_id": "subscriber", "version": "3"},
+        {"_id": "GOAT", "version": "1"},       # collectible, vybraný
+        {"_id": "level", "version": "7"},      # level badge, verze = level
+    ]                                          # FLYBY není selected -> vynechán
+    tb = {b["name"]: b["versions"] for b in doc["embeddedData"]["twitchBadges"]}
+    assert set(tb) == {"GOAT"}                 # level obrázek spadl (404) -> neembeduje se
 
 
 def test_without_duration_stops_on_idle():

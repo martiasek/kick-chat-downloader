@@ -10,6 +10,13 @@ PNG = bytes.fromhex(
 )
 
 
+BADGES_V2 = [
+    {"name": "GOAT", "image_url": "https://img.kick/goat.png", "selected": True, "sort_order": 1},
+    {"name": "level", "image_url": "https://img.kick/lvl7.png", "selected": True, "sort_order": 2, "metadata": {"level": 7}},
+    {"name": "FLYBY", "image_url": "https://img.kick/flyby.png", "selected": False},
+]
+
+
 def make_msg(i: int, offset_s: float, content: str) -> dict:
     return {
         "id": f"m{i}",
@@ -17,7 +24,8 @@ def make_msg(i: int, offset_s: float, content: str) -> dict:
         "content": content,
         "type": "message",
         "sender": {"id": 100 + i, "username": f"User_{i}", "slug": f"user-{i}",
-                   "identity": {"color": "#ff00ff", "badges": [{"type": "subscriber", "count": 3}]}},
+                   "identity": {"color": "#ff00ff", "badges": [{"type": "subscriber", "count": 3}],
+                                "badges_v2": BADGES_V2}},
     }
 
 
@@ -45,6 +53,11 @@ class FakeClient:
             raise KickError("boom")
         return [m for m in self.msgs
                 if at <= datetime.fromisoformat(m["created_at"]) < at + timedelta(seconds=5)]
+
+    def fetch_image(self, url):
+        if "lvl7" in url:
+            raise KickError("404")
+        return PNG
 
     def fetch_emote(self, emote_id):
         if str(emote_id) == "5":

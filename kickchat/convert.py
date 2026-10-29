@@ -30,11 +30,31 @@ def split_fragments(content: str) -> list[dict]:
     return out
 
 
+def _v2_key(b: dict) -> tuple[str, str] | None:
+    """(název, verze) globálního badge z badges_v2. Level badge má verzi = číslo levelu."""
+    name = b.get("name")
+    if not name:
+        return None
+    level = (b.get("metadata") or {}).get("level")
+    return str(name), str(level) if level is not None else "1"
+
+
+def _selected_v2(sender: dict) -> list[dict]:
+    """Globální badge (collectibles, level…), které má uživatel vybrané k zobrazení."""
+    return [
+        b for b in (sender.get("identity") or {}).get("badges_v2") or []
+        if b.get("selected") and b.get("image_url") and _v2_key(b)
+    ]
+
+
 def _badges(sender: dict) -> list[dict]:
     res = []
     for b in (sender.get("identity") or {}).get("badges") or []:
         if b.get("type"):
             res.append({"_id": str(b["type"]), "version": str(b.get("count", 1))})
+    for b in sorted(_selected_v2(sender), key=lambda b: b.get("sort_order", 50)):
+        name, version = _v2_key(b)
+        res.append({"_id": name, "version": version})
     return res
 
 
@@ -78,6 +98,23 @@ def collect_emotes(messages: Iterable[dict]) -> dict[str, str]:
     return found
 
 
+def collect_badges(messages: Iterable[dict]) -> dict[tuple[str, str], str]:
+    """{(název, verze): URL obrázku} pro všechny globální badge ve zprávách."""
+    found: dict[tuple[str, str], str] = {}
+    for m in messages:
+        for b in _selected_v2(m.get("sender") or {}):
+            found.setdefault(_v2_key(b), b["image_url"])
+    return found
+
+
+def embed_badges(images: dict[tuple[str, str], bytes]) -> list[dict]:
+    """Seskupí obrázky podle názvu do formátu embeddedData.twitchBadges."""
+    grouped: dict[str, dict[str, str]] = {}
+    for (name, version), data in images.items():
+        grouped.setdefault(name, {})[version] = base64.b64encode(data).decode("ascii")
+    return [{"name": n, "versions": v} for n, v in grouped.items()]
+
+
 def embed_emote(name: str, data: bytes) -> dict:
     width = height = 56
     try:
@@ -110,6 +147,7 @@ def build_document(
     view_count: int,
     comments: list[dict],
     third_party: list[dict],
+    twitch_badges: list[dict] | None = None,
     now: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
 ) -> dict:
     channel_id = str(channel.get("id", ""))
@@ -151,5 +189,5 @@ def build_document(
             ],
         },
         "comments": comments,
-        "embeddedData": {"thirdParty": third_party, "twitchBadges": [], "twitchBits": []},
+        "embeddedData": {"thirdParty": third_party, "twitchBadges": twitch_badges or [], "twitchBits": []},
     }

@@ -76,3 +76,8 @@ class KickClient:
 
     def fetch_emote(self, emote_id: str | int) -> bytes:
         return self._get(EMOTE_URL.format(id=emote_id), binary=True)
+
+    def fetch_image(self, url: str) -> bytes:
+        if not url.startswith("https://"):
+            raise KickError(f"Nepodporovaná URL obrázku: {url}")
+        return self._get(url, binary=True)

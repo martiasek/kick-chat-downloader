@@ -21,6 +21,7 @@ class Client(Protocol):
     def list_videos(self, channel_id) -> list[dict]: ...
     def history(self, channel_id, at: datetime) -> list[dict]: ...
     def fetch_emote(self, emote_id) -> bytes: ...
+    def fetch_image(self, url: str) -> bytes: ...
 
 
 class Cancelled(Exception):
@@ -161,9 +162,33 @@ def run(
                 if res:
                     third.append(res)
 
+    # --- badge (collectibles, level…) ---
+    badge_docs: list[dict] = []
+    if with_emotes:
+        badges = convert.collect_badges(ordered)
+        p.phase, p.done, p.total = "emotes", 0, len(badges)
+        p.message = "Stahuju obrázky badgů…"
+
+        def get_badge(item):
+            key, url = item
+            try:
+                return key, client.fetch_image(url)
+            except KickError:
+                return key, None
+
+        images: dict[tuple[str, str], bytes] = {}
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            for key, data in pool.map(get_badge, badges.items()):
+                check()
+                p.done += 1
+                if data:
+                    images[key] = data
+        badge_docs = convert.embed_badges(images)
+
     doc = convert.build_document(
         channel=channel, slug=slug, video_id=vod_uuid, title=title, start=start,
         length_s=length_s, game=game, view_count=views, comments=comments, third_party=third,
+        twitch_badges=badge_docs,
     )
     p.phase, p.message = "done", f"Hotovo: {len(comments)} zpráv."
     return doc

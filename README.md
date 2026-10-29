@@ -24,7 +24,7 @@ python app.py                                      # http://127.0.0.1:5000
 Vlož URL ve tvaru `https://kick.com/<kanál>/videos/<uuid>`, klikni na **Stáhnout chat**
 a po dokončení **Stáhnout JSON**. Soubor se zároveň uloží do složky `output/`.
 
-- *Přibalit emoty*: stáhne obrázky emotů do `embeddedData` (potřeba pro vykreslení v TwitchDownloaderu).
+- *Přibalit emoty a badge*: stáhne obrázky emotů a globálních badgů (collectibles jako GOAT, Golden K, level…) do `embeddedData`. Badge se ukládají jen ty, které má uživatel vybrané k zobrazení.
 - *Délka VOD* (pokročilé): pokud Kick délku videa nevrátí, appka skončí až po 30 min bez zprávy.
   Když po streamu v chatu dál píšou, zadej délku ručně.
 
