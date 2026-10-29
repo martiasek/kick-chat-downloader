@@ -128,11 +128,25 @@ def pick_sub_tier(tiers: list[dict], months: int) -> str | None:
     return best["src"] if best else None
 
 
+def _badge_title(name: str, version: str) -> str:
+    if name == "level":
+        return f"Level {version}"
+    if name == "subscriber":
+        return f"{version}-Month Subscriber"
+    return name
+
+
 def embed_badges(images: dict[tuple[str, str], bytes]) -> list[dict]:
-    """Seskupí obrázky podle názvu do formátu embeddedData.twitchBadges."""
-    grouped: dict[str, dict[str, str]] = {}
+    """Formát embeddedData.twitchBadges, jaký čte TwitchDownloader:
+    [{"name": ..., "versions": {verze: {"title", "description", "bytes": base64}}}]"""
+    grouped: dict[str, dict[str, dict]] = {}
     for (name, version), data in images.items():
-        grouped.setdefault(name, {})[version] = base64.b64encode(data).decode("ascii")
+        title = _badge_title(name, version)
+        grouped.setdefault(name, {})[version] = {
+            "title": title,
+            "description": title,
+            "bytes": base64.b64encode(data).decode("ascii"),
+        }
     return [{"name": n, "versions": v} for n, v in grouped.items()]
 
 

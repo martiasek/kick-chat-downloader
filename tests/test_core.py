@@ -50,6 +50,11 @@ def test_full_run():
     tb = {b["name"]: b["versions"] for b in doc["embeddedData"]["twitchBadges"]}
     assert set(tb) == {"GOAT", "subscriber", "moderator"}   # level spadl (404) -> neembeduje se
     assert tb["subscriber"].keys() == {"3"} and tb["moderator"].keys() == {"1"}
+    # TwitchDownloader čte každou verzi jako objekt ChatBadgeData (ne holý řetězec)
+    v = tb["subscriber"]["3"]
+    assert set(v) == {"title", "description", "bytes"} and v["title"] == "3-Month Subscriber"
+    import base64
+    assert base64.b64decode(v["bytes"])[:4] == b"\x89PNG"
 
 
 def test_without_duration_stops_on_idle():
