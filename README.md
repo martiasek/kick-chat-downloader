@@ -39,6 +39,18 @@ Po spuštění otevře prohlížeč, stažené chaty ukládá do složky `output
 Poznámky: první start je pomalejší (rozbaluje se). Antivir může u neznámého `.exe` zahlásit varování
 (typické u PyInstalleru). Pokud vadí, použij `run.bat`.
 
+### Automatický build na GitHubu
+
+Workflow `.github/workflows/build-exe.yml` spustí testy a na Windows sestaví `.exe`. Spouští se ručně
+(záložka *Actions → Build Windows exe → Run workflow*) nebo vydáním verze:
+
+```bash
+git tag v1.0.0
+git push --tags
+```
+
+U tagu se `.exe` automaticky přiloží k *Release* na GitHubu, odkud si ho kamarád stáhne.
+
 ## Vykreslení v TwitchDownloaderu
 
 Při renderu (*Chat Render*) **zaškrtni Offline** (v CLI `--offline`). Bez toho TwitchDownloader posílá
