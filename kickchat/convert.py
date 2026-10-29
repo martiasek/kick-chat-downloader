@@ -107,6 +107,27 @@ def collect_badges(messages: Iterable[dict]) -> dict[tuple[str, str], str]:
     return found
 
 
+def collect_channel_badges(messages: Iterable[dict]) -> set[tuple[str, str]]:
+    """{(typ, verze)} badgů kanálu (subscriber, moderator, vip…) použitých ve zprávách.
+    Verze je stejná jako ve user_badges (u subscribera počet měsíců)."""
+    found: set[tuple[str, str]] = set()
+    for m in messages:
+        for b in ((m.get("sender") or {}).get("identity") or {}).get("badges") or []:
+            if b.get("type"):
+                found.add((str(b["type"]), str(b.get("count", 1))))
+    return found
+
+
+def pick_sub_tier(tiers: list[dict], months: int) -> str | None:
+    """URL obrázku subscriber badge: nejvyšší tier s months <= počtu měsíců uživatele."""
+    best = None
+    for t in tiers or []:
+        src = (t.get("badge_image") or {}).get("src")
+        if src and t.get("months", 0) <= months and (best is None or t["months"] > best["months"]):
+            best = {"months": t["months"], "src": src}
+    return best["src"] if best else None
+
+
 def embed_badges(images: dict[tuple[str, str], bytes]) -> list[dict]:
     """Seskupí obrázky podle názvu do formátu embeddedData.twitchBadges."""
     grouped: dict[str, dict[str, str]] = {}

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Callable, Protocol
 
+from . import badges as badgemod
 from . import convert
 from .client import KickError
 from .urls import parse_kick_date, parse_vod_url, uuid7_datetime
@@ -52,6 +53,13 @@ def _duration_s(vod: dict | None) -> int | None:
     if isinstance(v, (int, float)) and v > 0:
         return int(v / 1000) if v > 172_800 else int(v)
     return None
+
+
+def _try_image(client, url: str) -> bytes | None:
+    try:
+        return client.fetch_image(url)
+    except KickError:
+        return None
 
 
 def run(
@@ -183,6 +191,25 @@ def run(
                 p.done += 1
                 if data:
                     images[key] = data
+
+        # badge kanálu: subscriber z API (podle tieru), ostatní naše ikony
+        p.message = "Stahuju obrázky badgů kanálu…"
+        tiers = channel.get("subscriber_badges") or []
+        seen = convert.collect_channel_badges(ordered)
+        sub_url: dict[tuple[str, str], str] = {}
+        for typ, ver in seen:
+            if typ == "subscriber" and ver.isdigit():
+                url = convert.pick_sub_tier(tiers, int(ver))
+                if url:
+                    sub_url[(typ, ver)] = url
+        by_url: dict[str, bytes | None] = {}
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            urls = sorted(set(sub_url.values()))
+            for u, data in zip(urls, pool.map(lambda u: _try_image(client, u), urls)):
+                by_url[u] = data
+        for typ, ver in seen:
+            data = by_url.get(sub_url.get((typ, ver), ""))
+            images[(typ, ver)] = data or badgemod.icon_png(typ)
         badge_docs = convert.embed_badges(images)
 
     doc = convert.build_document(

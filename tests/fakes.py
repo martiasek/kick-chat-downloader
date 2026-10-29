@@ -24,7 +24,7 @@ def make_msg(i: int, offset_s: float, content: str) -> dict:
         "content": content,
         "type": "message",
         "sender": {"id": 100 + i, "username": f"User_{i}", "slug": f"user-{i}",
-                   "identity": {"color": "#ff00ff", "badges": [{"type": "subscriber", "count": 3}],
+                   "identity": {"color": "#ff00ff", "badges": [{"type": "subscriber", "count": 3}, {"type": "moderator", "count": 1}],
                                 "badges_v2": BADGES_V2}},
     }
 
@@ -38,7 +38,10 @@ class FakeClient:
         self.calls = 0
 
     def get_channel(self, slug):
-        return {"id": 12345, "slug": slug, "user": {"username": "Haiset"}}
+        return {"id": 12345, "slug": slug, "user": {"username": "Haiset"},
+                "subscriber_badges": [{"months": 1, "badge_image": {"src": "https://img.kick/sub1.png"}},
+                                      {"months": 3, "badge_image": {"src": "https://img.kick/sub3.png"}},
+                                      {"months": 6, "badge_image": {"src": "https://img.kick/sub6.png"}}]}
 
     def list_videos(self, channel_id):
         v = {"id": VOD, "start_time": "2026-09-06 19:02:13", "title": "Test stream",

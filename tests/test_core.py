@@ -43,11 +43,13 @@ def test_full_run():
     assert names == {"POLICE"}  # emote 5 spadl a neshodil job
     assert c[0]["message"]["user_badges"] == [
         {"_id": "subscriber", "version": "3"},
+        {"_id": "moderator", "version": "1"},
         {"_id": "GOAT", "version": "1"},       # collectible, vybraný
         {"_id": "level", "version": "7"},      # level badge, verze = level
     ]                                          # FLYBY není selected -> vynechán
     tb = {b["name"]: b["versions"] for b in doc["embeddedData"]["twitchBadges"]}
-    assert set(tb) == {"GOAT"}                 # level obrázek spadl (404) -> neembeduje se
+    assert set(tb) == {"GOAT", "subscriber", "moderator"}   # level spadl (404) -> neembeduje se
+    assert tb["subscriber"].keys() == {"3"} and tb["moderator"].keys() == {"1"}
 
 
 def test_without_duration_stops_on_idle():
@@ -88,3 +90,19 @@ def test_same_schema_as_sample():
     assert s["comments"][0]["message"].keys() == d["comments"][0]["message"].keys()
     assert s["comments"][0]["commenter"].keys() == d["comments"][0]["commenter"].keys()
     assert s["embeddedData"]["thirdParty"][0].keys() == d["embeddedData"]["thirdParty"][0].keys()
+
+
+def test_badge_icons_are_valid_pngs():
+    import base64, io
+    from PIL import Image
+    from kickchat import badges
+    for t in ["vip", "moderator", "verified", "og", "neznamy_typ"]:
+        im = Image.open(io.BytesIO(badges.icon_png(t)))
+        assert im.size == (72, 72) and im.format == "PNG"
+
+
+def test_pick_sub_tier():
+    tiers = [{"months": 1, "badge_image": {"src": "a"}}, {"months": 6, "badge_image": {"src": "b"}}]
+    assert convert.pick_sub_tier(tiers, 5) == "a"
+    assert convert.pick_sub_tier(tiers, 9) == "b"
+    assert convert.pick_sub_tier([], 3) is None

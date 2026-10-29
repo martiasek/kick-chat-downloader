@@ -24,7 +24,9 @@ python app.py                                      # http://127.0.0.1:5000
 Vlož URL ve tvaru `https://kick.com/<kanál>/videos/<uuid>`, klikni na **Stáhnout chat**
 a po dokončení **Stáhnout JSON**. Soubor se zároveň uloží do složky `output/`.
 
-- *Přibalit emoty a badge*: stáhne obrázky emotů a globálních badgů (collectibles jako GOAT, Golden K, level…) do `embeddedData`. Badge se ukládají jen ty, které má uživatel vybrané k zobrazení.
+- *Přibalit emoty a badge*: stáhne obrázky emotů a globálních badgů (collectibles jako GOAT, Golden K, level…) do `embeddedData`. Globální badge se ukládají jen ty, které má uživatel vybrané k zobrazení.
+  Badge kanálu: *subscriber* má obrázky z API (podle tieru/měsíců), ostatní (moderátor, VIP, founder, OG…)
+  nemají v API obrázek, proto se kreslí vlastní jednoduché ikony (`kickchat/badges.py`).
 - *Délka VOD* (pokročilé): pokud Kick délku videa nevrátí, appka skončí až po 30 min bez zprávy.
   Když po streamu v chatu dál píšou, zadej délku ručně.
 
