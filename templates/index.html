@@ -64,6 +64,7 @@
     <progress id="bar" max="1" value="0"></progress>
     <div class="stats" id="stats"></div>
     <div class="actions" id="dl" hidden><button id="dlbtn">Stáhnout JSON</button></div>
+    <p class="hint" id="tip" hidden>Tip: v TwitchDownloaderu (Chat Render) zaškrtni <b>Offline</b>, jinak může render spadnout.</p>
   </section>
 </main>
 <script>
@@ -72,7 +73,7 @@ let jobId = null, timer = null;
 
 $('form').addEventListener('submit', async e => {
   e.preventDefault();
-  $('go').disabled = true; $('dl').hidden = true; $('cancel').hidden = false;
+  $('go').disabled = true; $('dl').hidden = true; $('tip').hidden = true; $('cancel').hidden = false;
   $('status').style.display = 'block'; $('msg').className = ''; $('msg').textContent = 'Startuju…';
   $('bar').removeAttribute('value'); $('stats').textContent = '';
   const r = await fetch('/api/jobs', { method:'POST', headers:{'Content-Type':'application/json'},
@@ -100,7 +101,7 @@ async function poll() {
   if (s.phase === 'error' || s.phase === 'cancelled') return fail(s.message);
   if (s.phase === 'done' && s.ready) {
     clearInterval(timer); $('go').disabled = false; $('cancel').hidden = true;
-    $('bar').max = 1; $('bar').value = 1; $('dl').hidden = false;
+    $('bar').max = 1; $('bar').value = 1; $('dl').hidden = false; $('tip').hidden = false;
   }
 }
 </script>

@@ -30,6 +30,13 @@ a po dokončení **Stáhnout JSON**. Soubor se zároveň uloží do složky `out
 - *Délka VOD* (pokročilé): pokud Kick délku videa nevrátí, appka skončí až po 30 min bez zprávy.
   Když po streamu v chatu dál píšou, zadej délku ručně.
 
+## Vykreslení v TwitchDownloaderu
+
+Při renderu (*Chat Render*) **zaškrtni Offline** (v CLI `--offline`). Bez toho TwitchDownloader posílá
+`streamer.id` (ID kanálu z Kicku) na Twitch, kde nemusí existovat, a spadne s chybou
+„Object reference not set to an instance of an object“. Všechny emoty i badge jsou přímo v souboru,
+takže offline režim nic neztratí.
+
 ## Jak to funguje
 
 1. `kick.com/api/v2/channels/{slug}` → id kanálu
