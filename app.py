@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import threading
 import uuid
 from pathlib import Path
@@ -13,12 +14,15 @@ from kickchat import job as jobmod
 from kickchat.client import KickClient, KickError
 from kickchat.urls import BadUrl, parse_vod_url
 
-OUTPUT_DIR = Path(__file__).parent / "output"
+FROZEN = getattr(sys, "frozen", False)  # běží jako .exe (PyInstaller)
+# V .exe jsou šablony rozbalené v dočasné složce, výstup patří vedle .exe.
+BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+OUTPUT_DIR = (Path(sys.executable).parent if FROZEN else Path(__file__).parent) / "output"
 MAX_JOBS = 20
 
 
 def create_app(client_factory=KickClient) -> Flask:
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder=str(BASE_DIR / "templates"))
     jobs: dict[str, dict] = {}
     lock = threading.Lock()
 

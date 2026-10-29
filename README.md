@@ -30,6 +30,15 @@ a po dokončení **Stáhnout JSON**. Soubor se zároveň uloží do složky `out
 - *Délka VOD* (pokročilé): pokud Kick délku videa nevrátí, appka skončí až po 30 min bez zprávy.
   Když po streamu v chatu dál píšou, zadej délku ručně.
 
+## Jeden soubor `.exe` (bez instalace Pythonu)
+
+Na Windows (jednorázově, potřebuješ Python): dvojklik na **`build_exe.bat`**. Vznikne
+`dist\KickChatDownloader.exe`. Ten stačí poslat kamarádovi, Python mu nemusí instalovat.
+Po spuštění otevře prohlížeč, stažené chaty ukládá do složky `output` vedle `.exe`.
+
+Poznámky: první start je pomalejší (rozbaluje se). Antivir může u neznámého `.exe` zahlásit varování
+(typické u PyInstalleru). Pokud vadí, použij `run.bat`.
+
 ## Vykreslení v TwitchDownloaderu
 
 Při renderu (*Chat Render*) **zaškrtni Offline** (v CLI `--offline`). Bez toho TwitchDownloader posílá
